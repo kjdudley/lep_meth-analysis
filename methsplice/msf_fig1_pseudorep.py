@@ -23,14 +23,18 @@ matplotlib.rcParams.update({
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Repo-relative: inputs ship in methsplice/tables/, figures are written beside
+# this script. The original walked three directories up from a different layout.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = _HERE
+os.makedirs(os.path.join(_HERE, "figures"), exist_ok=True)
 INK = "#1a1a2e"; BLUE, ORANGE = "#2a78d6", "#eb6834"
 
 # (C) data: per-exon within-group SD over the six control individuals
 ctrl_cols = ["psi_112c", "psi_114c", "psi_115c", "psi_131c", "psi_136c",
              "psi_138c"]
 sds = []
-with open(os.path.join(ROOT, "methsplice/contrast.tsv")) as fh:
+with open(os.path.join(ROOT, "tables/contrast.tsv")) as fh:
     rdr = csv.DictReader(fh, delimiter="\t")
     for r in rdr:
         try:
@@ -74,14 +78,14 @@ A.legend(fontsize=8, frameon=False, loc="upper right")
 PUBLISHED_EXON_GENES = 524      # Li-Byarlay et al. 2013
 PUBLISHED_IR_GENES = 27         # Li-Byarlay et al. 2013
 
-_pf = os.path.join(ROOT, "methsplice/pooled_fisher_sig.tsv")
+_pf = os.path.join(ROOT, "tables/pooled_fisher_sig.tsv")
 if not os.path.exists(_pf):
     raise SystemExit("FATAL: pooled_fisher_sig.tsv missing")
 with open(_pf) as fh:
     _rows = list(csv.DictReader(fh, delimiter="\t"))
 ours_exon_genes = len({r["gene"] for r in _rows})
 
-_ir = open(os.path.join(ROOT, "methsplice/ir_summary.txt")).read()
+_ir = open(os.path.join(ROOT, "tables/ir_summary.txt")).read()
 _m = re.search(r"FDR<0\.1\):\s*(\d+)\s+of\s+\d+\s+introns", _ir)
 if not _m:
     raise SystemExit("FATAL: cannot parse the 2013-shape count from ir_summary.txt")
@@ -114,6 +118,6 @@ C.text(statistics.median(sds) + 0.008, C.get_ylim()[1]*0.9,
 C.set_xlabel("within-group SD of individual PSI", fontsize=8)
 C.set_ylabel("exons (0.05 < mean PSI < 0.95)", fontsize=8)
 
-out = os.path.join(ROOT, "figures", "msf_fig1_pseudorep")
+out = os.path.join(_HERE, "figures", "msf_fig1_pseudorep")
 fig.savefig(out + ".pdf"); fig.savefig(out + ".png", dpi=170)
 print("wrote", out)

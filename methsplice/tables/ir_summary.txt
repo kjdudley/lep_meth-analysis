@@ -1,0 +1,13 @@
+individuals: ['112c', '114c', '115c', '131c', '136c', '138c'] vs ['187t', '196t', '198t', '205t', '212t', '214t']
+global IR per individual: {'112c': 1.0494, '114c': 1.0412, '115c': 1.0416, '131c': 1.0443, '136c': 1.0454, '138c': 1.0475, '187t': 1.05, '196t': 1.0508, '198t': 1.0525, '205t': 1.0517, '212t': 1.045, '214t': 1.0495}
+introns passing support: 55806
+
+1. GLOBAL DIRECTION: median IR control=0.9405 kd=0.9367; introns with IR down in KD: 29686/55806 (53.2%)
+
+2. PER-INTRON (n=51582 complete): BH FDR<0.05 = 0; permutation-floor count 571 vs 112 expected
+
+3. DOSE-RESPONSE: slope(dIR ~ intron meth) = +0.000038 [95% CI -0.000238, +0.000243] n=19292 introns, 4756 genes
+
+4. 2013 SHAPE (pooled Fisher on depth counts, FDR<0.1): 387 of 51582 introns 'significant'
+
+wrote methsplice/ir_contrast.tsv

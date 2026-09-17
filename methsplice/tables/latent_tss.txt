@@ -1,0 +1,8 @@
+# ms1_latent_tss.py — DKO-novel junction ends vs WT HCT116 PRO-cap peaks
+# Peaks: union of ENCODE ENCSR273JQN + ENCSR966RLG released GRCh38 bed files
+# (ENCFF124AHW ENCFF164MAE ENCFF241DYI ENCFF266PAF ENCFF358OXF ENCFF656KEA ENCFF053RAL)
+# chrmap: GCF_000001405.40_GRCh38.p14_assembly_report.txt (UCSC col10 -> RefSeq col7, CR-stripped)
+# Run 2026-08-17 on Aqua, from $ROOT with --config contrasts.tsv
+PRO-cap peak positions: 172457 on 24 mapped chroms
+DKO-novel        ends near WT PRO-cap peak (+-300bp): 1384/31340 (4.42%)   positional null (+50kb): 2.02%
+shared control   ends near WT PRO-cap peak (+-300bp): 2007/31340 (6.40%)   positional null (+50kb): 2.93%

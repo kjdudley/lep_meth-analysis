@@ -1,0 +1,6 @@
+rule	class	n_exon	n_gene	slope	ci_lo	ci_hi
+overlap	ALL	13735	8429	-0.000100	-0.000139	-0.000062
+overlap	other_genes	13326	8156	-0.000071	-0.000106	-0.000037
+proximity	ALL	13735	8429	-0.000100	-0.000138	-0.000061
+proximity	novel_junction_genes	2968	1757	-0.000200	-0.000305	-0.000098
+proximity	other_genes	10767	6672	-0.000052	-0.000093	-0.000016

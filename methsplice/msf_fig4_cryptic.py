@@ -29,7 +29,11 @@ matplotlib.rcParams.update({
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Repo-relative: inputs ship in methsplice/tables/, figures are written beside
+# this script. The original walked three directories up from a different layout.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = _HERE
+os.makedirs(os.path.join(_HERE, "figures"), exist_ok=True)
 MS = os.path.join(ROOT, "methsplice")
 INK = "#1a1a2e"; INK2 = "#52514e"
 BLUE, ORANGE, GREEN = "#2a78d6", "#eb6834", "#2e8b57"
@@ -178,7 +182,7 @@ for i, (o, n) in enumerate(zip(obs, nul)):
 D.legend(fontsize=8, frameon=False, loc="upper left")
 D.set_ylim(0, max(obs) * 1.35)
 
-out = os.path.join(ROOT, "figures", "msf_fig4_cryptic")
+out = os.path.join(_HERE, "figures", "msf_fig4_cryptic")
 fig.savefig(out + ".pdf"); fig.savefig(out + ".png", dpi=170)
 print("wrote", out)
 print(f"  A: {g1[0]}/{g2[0]} x{rat[0]}   B: {vals[0]:.2f}/{vals[1]:.2f} "

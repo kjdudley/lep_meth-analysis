@@ -1,0 +1,15 @@
+stat	value	note
+complete_exons	37416	
+at_floor_obs	87	
+at_floor_exp	81.0	n * 2/924
+p05_obs	888	
+p05_exp	1870.8	n * 0.05
+bh_reject	0	Benjamini-Hochberg q<0.05
+dpsi_gt05	940	|dPSI| > 0.05
+candidates	57	at floor AND |dPSI|>0.05
+dpsi_max_gt05	2995	max |dPSI| over the 924 splits > 0.05
+candidates_exp	6.5	dpsi_max_gt05 * 2/924
+cand_3cpg	31	candidates with >=3 CpGs
+cand_3cpg_meth10	6	
+all_3cpg	23037	
+all_3cpg_meth10	8176	

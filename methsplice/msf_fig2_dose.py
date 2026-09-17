@@ -20,8 +20,12 @@ matplotlib.rcParams.update({
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-rows = list(csv.DictReader(open(os.path.join(ROOT, "methsplice/degron_dose.tsv")), delimiter="\t"))
+# Repo-relative: inputs ship in methsplice/tables/, figures are written beside
+# this script. The original walked three directories up from a different layout.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = _HERE
+os.makedirs(os.path.join(_HERE, "figures"), exist_ok=True)
+rows = list(csv.DictReader(open(os.path.join(ROOT, "tables/degron_dose.tsv")), delimiter="\t"))
 INK = "#1a1a2e"; BLUE, ORANGE = "#2a78d6", "#eb6834"
 LINE = {"d1aid": "DNMT1-AID", "u1aid": "UHRF1-AID", "dual": "dual"}
 
@@ -87,6 +91,6 @@ C.set_ylabel("coupling slope (x1e-6)", fontsize=8)
 C.text(0.04, 0.06, f"|slope of slopes| < {worst:.1e}\nper point, both definitions",
        transform=C.transAxes, fontsize=8, color=INK)
 
-out = os.path.join(ROOT, "figures", "msf_fig2_dose")
+out = os.path.join(_HERE, "figures", "msf_fig2_dose")
 fig.savefig(out + ".pdf"); fig.savefig(out + ".png", dpi=170)
 print("wrote", out)

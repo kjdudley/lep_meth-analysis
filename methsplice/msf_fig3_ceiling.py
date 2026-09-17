@@ -23,14 +23,18 @@ matplotlib.rcParams.update({
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Repo-relative: inputs ship in methsplice/tables/, figures are written beside
+# this script. The original walked three directories up from a different layout.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = _HERE
+os.makedirs(os.path.join(_HERE, "figures"), exist_ok=True)
 INK = "#1a1a2e"; BLUE, ORANGE = "#2a78d6", "#eb6834"
 
 # bee strata from the committed per-exon table
 strata = [(0, 0.001, "0"), (0.001, 5, "0-5"), (5, 20, "5-20"),
           (20, 50, "20-50"), (50, 101, ">=50")]
 counts = [[0, 0] for _ in strata]     # [n, n_ceiling]
-with open(os.path.join(ROOT, "methsplice/contrast.tsv")) as fh:
+with open(os.path.join(ROOT, "tables/contrast.tsv")) as fh:
     rdr = csv.DictReader(fh, delimiter="\t")
     for r in rdr:
         try:
@@ -91,6 +95,6 @@ B.set_ylim(0, 122)
 B.legend(fontsize=8, frameon=False, loc="upper center", ncol=2,
          handlelength=1.1, columnspacing=0.9, borderaxespad=0.1)
 
-out = os.path.join(ROOT, "figures", "msf_fig3_ceiling")
+out = os.path.join(_HERE, "figures", "msf_fig3_ceiling")
 fig.savefig(out + ".pdf"); fig.savefig(out + ".png", dpi=170)
 print("wrote", out)
