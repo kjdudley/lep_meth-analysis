@@ -25,9 +25,15 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-S = "/tmp/claude-1000/-home-eldudy-lep-meth/14f2dac2-87c2-49f7-bfc8-867bf4195ecc/scratchpad"
-R = "/home/eldudy/lep_meth/results/lowmeth/hi70"
-REG = "/home/eldudy/lep_meth/results/qc/panel_registry.tsv"
+# Paths resolve relative to this script, so the figures rebuild from a fresh
+# clone of the analysis repository with no editing. The originals pointed at an
+# absolute working directory, which meant the script appeared to run inside a
+# clone while silently reading files from outside it.
+import os
+_HERE = os.path.dirname(os.path.abspath(__file__))
+S = os.path.join(_HERE, "tables")
+R = os.path.join(_HERE, "tables", "floor")
+REG = os.path.join(_HERE, "tables", "panel_registry.tsv")
 MM = 1/25.4
 
 plt.rcParams.update({

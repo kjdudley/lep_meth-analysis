@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """Methods paper, Figure 2: the simulation.
 
@@ -20,9 +21,10 @@ matplotlib.rcParams["font.size"] = 8
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sweep = list(csv.DictReader(open(os.path.join(ROOT, "hassulta/sim_conservation.tsv")), delimiter="\t"))
-grid = list(csv.DictReader(open(os.path.join(ROOT, "hassulta/sim_conservation_grid.tsv")), delimiter="\t"))
+# Repo-relative: tables ship in conservation/tables/ in this repository.
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tables")
+sweep = list(csv.DictReader(open(os.path.join(ROOT, "sim_conservation.tsv")), delimiter="\t"))
+grid = list(csv.DictReader(open(os.path.join(ROOT, "sim_conservation_grid.tsv")), delimiter="\t"))
 assert len(grid) == 36, len(grid)
 
 INK = "#1a1a2e"

@@ -19,9 +19,10 @@ matplotlib.rcParams["font.size"] = 8
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Repo-relative: tables ship in conservation/tables/ in this repository.
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tables")
 nulls = np.array([int(l) for l in
-                  open(os.path.join(ROOT, "hassulta/harm_topk.nulls.tsv")).read().split()[1:]])
+                  open(os.path.join(ROOT, "harm_topk.nulls.tsv")).read().split()[1:]])
 OBS, EXP = 183, 90.6
 INK = "#1a1a2e"; BLUE, ORANGE, GREEN = "#2a78d6", "#eb6834", "#2e8b57"
 
