@@ -34,7 +34,7 @@ import numpy as np
 _HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = _HERE
 os.makedirs(os.path.join(_HERE, "figures"), exist_ok=True)
-MS = os.path.join(ROOT, "methsplice")
+MS = os.path.join(ROOT, "tables")
 INK = "#1a1a2e"; INK2 = "#52514e"
 BLUE, ORANGE, GREEN = "#2a78d6", "#eb6834", "#2e8b57"
 

@@ -72,7 +72,7 @@ for i, (f, n) in enumerate(zip(fr, ns)):
 # ceiling rows are `ceiling <meth>=50|meth<10>` with the fraction in `value`.
 def _ceiling(fn):
     rows = list(csv.DictReader(
-        open(os.path.join(ROOT, "methsplice", fn)), delimiter="\t"))
+        open(os.path.join(ROOT, "tables", fn)), delimiter="\t"))
     g = {r["cell"]: float(r["value"]) for r in rows if r["test"] == "ceiling"}
     if "meth>=50" not in g or "meth<10" not in g:
         raise SystemExit(f"FATAL: {fn} has no ceiling rows")
