@@ -93,8 +93,9 @@ def tsv(p):
     return [dict(zip(hdr, r)) for r in rows if r != hdr and len(r) == len(hdr)]
 
 def save(fig, name):
+    _out = os.path.join(_HERE, "figures"); os.makedirs(_out, exist_ok=True)
     for ext in ("pdf", "eps", "png"):
-        fig.savefig(f"{name}.{ext}", bbox_inches="tight", facecolor="white")
+        fig.savefig(os.path.join(_out, f"{name}.{ext}"), bbox_inches="tight", facecolor="white")
     plt.close(fig)
     print(f"  wrote {name}.pdf / .eps / .png")
 
