@@ -83,6 +83,6 @@ ax2.text(0.5, 1.02, "naive p < 1e-70 against zero;\nrelabelled data reproduce it
          transform=ax2.transAxes, ha="center", fontsize=6.4, style="italic")
 for sp in ("top", "right"):
     ax2.spines[sp].set_visible(False)
-out = os.path.join(ROOT, "figures", "mp_fig1_collapse")
+out = os.path.join(OUTDIR, "figures", "mp_fig1_collapse")
 fig.savefig(out + ".pdf"); fig.savefig(out + ".png", dpi=170)
 print("wrote", out)

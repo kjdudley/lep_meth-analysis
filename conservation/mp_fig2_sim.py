@@ -109,6 +109,6 @@ for i, (col, label) in enumerate(panels):
                 fontweight="bold", color=INK)
 fig.text(0.5, 0.012, "c: worst-case false-positive rate (%) across σ, per design cell",
          fontsize=7, style="italic", ha="center", color=INK)
-out = os.path.join(ROOT, "figures", "mp_fig2_sim")
+out = os.path.join(OUTDIR, "figures", "mp_fig2_sim")
 fig.savefig(out + ".pdf"); fig.savefig(out + ".png", dpi=170)
 print("wrote", out + ".{pdf,png}")

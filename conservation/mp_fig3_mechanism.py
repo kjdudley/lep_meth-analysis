@@ -83,6 +83,6 @@ ax2.text(0.97, 0.06, "permuted sets collapse at\nstrict thresholds; size-depende
          transform=ax2.transAxes, ha="right", fontsize=6.2, color=ORANGE)
 for sp in ("top", "right"):
     ax2.spines[sp].set_visible(False)
-out = os.path.join(ROOT, "figures", "mp_fig3_mechanism")
+out = os.path.join(OUTDIR, "figures", "mp_fig3_mechanism")
 fig.savefig(out + ".pdf"); fig.savefig(out + ".png", dpi=170)
 print("wrote", out)
