@@ -1,0 +1,63 @@
+#!/bin/bash
+#PBS -N gene_oe_meth
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=8:mem=48gb
+#PBS -l walltime=4:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/cpgoe/genemeth/
+#PBS -V
+
+# Does CpG o/e track MEASURED methylation, within one genome?
+#
+#   qsub -v LABEL=ilAgrLitu1 scripts/gene_oe_meth.pbs
+#
+# The BUSCO result (per-gene o/e fails GC control) cannot distinguish "o/e does
+# not track methylation" from "BUSCO genes cannot show it" -- they are under
+# strong purifying selection, which removes the CpG->TpG mutations o/e counts,
+# and in insects they ARE the methylated class, so the unmethylated comparison
+# class is absent by construction. This separates the two: one genome, ALL
+# annotated genes, classified by our own measured methylation.
+#
+# Sites are restricted to the 30-79x band -- our own section 2.2 recommendation,
+# applied to our own analysis rather than only recommended to readers.
+
+set -uo pipefail
+LABEL=${LABEL:?set -v LABEL=<species>}
+ROOT=/work/cyberomics/lep_meth
+O=$ROOT/cpgoe/genemeth
+S=$ROOT/pipeline/scripts
+export PATH=$ROOT/env/bin:$PATH
+mkdir -p "$O"
+
+row=$(awk -F'\t' -v L="$LABEL" '$1==L' "$ROOT/pipeline/rna_manifest.tsv")
+[ -n "$row" ] || { echo "no rna_manifest row for $LABEL"; exit 1; }
+FA=$ROOT/$(echo "$row" | cut -f3)
+GFF=$ROOT/$(echo "$row" | cut -f4)
+CPG=$ROOT/$(echo "$row" | cut -f5)
+for f in "$FA" "$GFF" "$CPG"; do
+    [ -s "$f" ] || { echo "missing $f"; exit 1; }
+done
+[ -s "$FA.fai" ] || samtools faidx "$FA"
+echo "=== $(date) $LABEL"
+echo "  fa=$FA"; echo "  gff=$GFF"; echo "  cpg=$CPG"
+
+BED=$O/$LABEL.genes.bed
+if [ ! -s "$BED" ]; then
+    python3 "$S/gene_oe_meth.py" bed --gff "$GFF" --fai "$FA.fai" --out "$BED" || exit 1
+fi
+echo "  gene spans: $(wc -l < "$BED")"
+
+# per-gene GC and CpG o/e from the assembly sequence. --no-windows because the
+# genome-wide window pass is not needed here and dominates runtime.
+if [ ! -s "$O/$LABEL.regions.tsv" ]; then
+    python3 "$S/cpg_oe.py" "$FA" --prefix "$O/$LABEL" --label "$LABEL" \
+        --bed "$BED" --no-windows || exit 1
+fi
+echo "  regions: $(( $(wc -l < "$O/$LABEL.regions.tsv") - 1 ))"
+
+python3 "$S/gene_oe_meth.py" join \
+    --regions "$O/$LABEL.regions.tsv" --cpg "$CPG" \
+    --out "$O/$LABEL.gene_oe_meth.tsv" || exit 1
+
+echo
+echo "=== $(date) done -- $O/$LABEL.gene_oe_meth.tsv"

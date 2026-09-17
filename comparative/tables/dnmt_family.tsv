@@ -1,0 +1,89 @@
+label	dnmt1_queries_at_locus	dnmt3_queries_at_locus	genotype
+Achroia_grisella	14	1	DNMT1 only
+Acidia_cognata	0	0	neither
+Acropora_palmata	16	1	DNMT1 only
+Acupalpus_dubius	16	1	DNMT1 only
+Adicella_reducta	15	1	DNMT1 only
+Adscita_statices	17	1	DNMT1 only
+Aethecerus_discolor	16	11	DNMT1+DNMT3
+Agonopterix_ciliella	16	1	DNMT1 only
+Allodia_ornaticollis	0	0	neither
+Anasimyia_lineata	0	0	neither
+Anopheles_minimus	0	0	neither
+Anthomyza_gracilis	0	0	neither
+Apis_mellifera	16	10	DNMT1+DNMT3
+Azelia_nebulosa	0	0	neither
+Beris_morrisii	0	0	neither
+Boloria_frigga	16	1	DNMT1 only
+Bombus_distinguendus	16	10	DNMT1+DNMT3
+Bryotropha_affinis	16	1	DNMT1 only
+Caenorhabditis_dolens	0	0	neither
+Caenorhabditis_elegans	0	0	neither
+Caenorhabditis_portoensis	0	0	neither
+Calliphora_loewi	0	0	neither
+Campiglossa_producta	0	0	neither
+Ceraclea_albimacula	16	0	DNMT1 only
+Ceraclea_dissimilis	16	0	DNMT1 only
+Clogmia_albipunctata	0	0	neither
+Coelopa_frigida	0	0	neither
+Coleophora_lutipennella	16	1	DNMT1 only
+Colotis_evagore	16	1	DNMT1 only
+Cylindromyia_interrupta	0	0	neither
+Dexiosoma_caninum	0	0	neither
+Diamesa_tonsa	1	1	neither
+Drymonia_dodonaea	16	1	DNMT1 only
+Eilema_lutarellum	17	1	DNMT1 only
+Fragum_whitleyi	16	1	DNMT1 only
+Glyphotaelius_pellucidus	15	1	DNMT1 only
+Idaea_ochrata	16	1	DNMT1 only
+Leptocerus_tineiformis	13	0	DNMT1 only
+Limnephilus_auricula	16	1	DNMT1 only
+Limnephilus_lunatus	11	1	DNMT1 only
+Limnephilus_marmoratus	16	1	DNMT1 only
+Limnephilus_rhombicus	16	1	DNMT1 only
+Lycaena_thersamon	15	1	DNMT1 only
+Melieria_omissa	0	0	neither
+Molanna_angustata	16	1	DNMT1 only
+Monopis_crocicapitella	15	1	DNMT1 only
+Myopa_buccata	0	0	neither
+Mystacides_azureus	16	0	DNMT1 only
+Mystacides_longicornis	16	0	DNMT1 only
+Mytilus_galloprovincialis	16	8	DNMT1+DNMT3
+Nemotelus_uliginosus	0	0	neither
+Odontocerum_albicorne	16	1	DNMT1 only
+Ostrinia_nubilalis	16	1	DNMT1 only
+Pammene_suspectana	15	1	DNMT1 only
+Papestra_biren	17	1	DNMT1 only
+Philopotamus_montanus	14	1	DNMT1 only
+Pocillopora_damicornis	16	1	DNMT1 only
+Ptychoptera_lacustris	0	0	neither
+Pyrgus_serratulae	16	1	DNMT1 only
+Ruditapes_philippinarum	16	1	DNMT1 only
+Scellus_notatus	0	0	neither
+Toxonevra_muliebris	0	0	neither
+Trichostegia_minor	16	1	DNMT1 only
+Tricyphona_immaculata	1	0	neither
+Xenostrobus_securis	15	1	DNMT1 only
+Xylocopa_violacea	16	10	DNMT1+DNMT3
+ilAgrLych1	16	1	DNMT1 only
+ilApaCren1	16	1	DNMT1 only
+ilApaSubl1	15	1	DNMT1 only
+ilCalLunu1	12	1	DNMT1 only
+ilCerLeuc1	16	1	DNMT1 only
+ilDasTemp1	16	1	DNMT1 only
+ilEurOccu1	17	1	DNMT1 only
+ilHadPleb2	17	1	DNMT1 only
+ilHelArmi9	15	1	DNMT1 only
+ilHopAmbi1	17	1	DNMT1 only
+ilHopBlan1	17	1	DNMT1 only
+ilHypRect1	16	1	DNMT1 only
+ilLacOler1	16	1	DNMT1 only
+ilLitLeau1	17	1	DNMT1 only
+ilLitOrni1	17	1	DNMT1 only
+ilLitSoci1	17	1	DNMT1 only
+ilNocJanh1	17	1	DNMT1 only
+ilPluFest1	16	1	DNMT1 only
+ilPolFlav1	17	1	DNMT1 only
+ilPolLich1	17	1	DNMT1 only
+ilPolNebu2	17	1	DNMT1 only
+ilPyrUmbr1	17	1	DNMT1 only

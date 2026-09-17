@@ -1,0 +1,63 @@
+#!/bin/bash
+#PBS -N meth_part
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=4:mem=32gb
+#PBS -l walltime=04:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/molanna/logs/
+#PBS -V
+#
+#   qsub pipeline/scripts/meth_partition.pbs               # original pair
+#   qsub -v SP=ceraclea pipeline/scripts/meth_partition.pbs
+#
+# Parameterised 2026-09-16. With no SP it reproduces the original Molanna +
+# Xylocopa run (job 25381429) exactly, so that result stays reproducible. With
+# SP set it partitions that species alone and prints the recorded comparators,
+# because the control was already run through this same code and re-running it
+# adds nothing unless meth_partition.py itself changes.
+#
+# GFF auto-detection: StringTie where RNA existed (Molanna), miniprot where it
+# did not (Ceraclea, and every Revio species). Both carry gene/mRNA/exon rows
+# in the convention meth_partition.py expects.
+#
+# FLOOR CAVEAT, carried from the 2026-09-16 Xylocopa correction: a class whose
+# rate sits at or below the 0.0759% clean floor yields an enrichment ratio with
+# a floor-limited denominator. Xylocopa's intergenic (0.05%) is one. Read the
+# class rates, not only the ratios.
+set -uo pipefail
+ROOT=/work/cyberomics/lep_meth
+MP="$ROOT/pipeline/scripts/meth_partition.py"
+
+run_one () {
+    local sp="$1" bed="$2" gff="$3"
+    [ -s "$bed" ] || { echo "FATAL: no bed at $bed"; return 1; }
+    [ -s "$gff" ] || { echo "FATAL: no gff at $gff"; return 1; }
+    echo "########## ${sp^^} ##########"
+    echo "  bed: $bed"
+    echo "  gff: $gff"
+    python3 "$MP" --bed "$bed" --gff "$gff" --label "$sp"
+}
+
+if [ -z "${SP:-}" ]; then
+    echo "########## MOLANNA (DNMT1 only, 10.63% in band) ##########"
+    python3 "$MP" --bed $ROOT/molanna/molanna.combined.bed.gz \
+        --gff $ROOT/molanna/gff/molanna.stringtie.gff3 --label molanna
+    echo
+    echo "########## XYLOCOPA CONTROL (DNMT1+DNMT3, 0.14% in band) ##########"
+    python3 "$MP" --bed $ROOT/xylo/xylo.combined.bed.gz \
+        --gff $ROOT/xylo/gff/xylo.mix.gff3 --label xylo
+else
+    BED="${BED:-$ROOT/$SP/$SP.combined.bed.gz}"   # override for genomes whose bed lives elsewhere (e.g. revio/)
+    GFF=""
+    for cand in "$ROOT/$SP/gff/$SP.stringtie.gff3" "$ROOT/$SP/gff/$SP.miniprot.gff3"; do
+        [ -s "$cand" ] && { GFF="$cand"; break; }
+    done
+    [ -n "$GFF" ] || { echo "FATAL: no stringtie or miniprot gff3 under $ROOT/$SP/gff/"; exit 1; }
+    run_one "$SP" "$BED" "$GFF" || exit 1
+    echo
+    echo "--- recorded comparators, same code, job 25381429 ---"
+    echo "  Molanna  exonic 46.01% (4.33x)  intronic 14.80% (1.39x)  intergenic 4.26% (0.40x)"
+    echo "  Xylocopa exonic  2.71% (7.32x)  intronic  0.21% (0.56x)  intergenic 0.05% (0.13x)"
+    echo "  clean floor (Acidia cognata) 0.0759%. Classes at or below it are floor-limited."
+fi
+echo "=== done $(date)"

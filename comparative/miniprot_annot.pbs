@@ -1,0 +1,159 @@
+#!/bin/bash
+#PBS -N miniprot_annot
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=16:mem=64gb
+#PBS -l walltime=08:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/ceraclea/logs/
+#PBS -V
+#
+#   qsub -v SP=ceraclea pipeline/scripts/miniprot_annot.pbs
+#
+# The no-RNA annotation route, recorded in DNMT_MOTIF_SCALE.md and used here
+# for the first time. Ceraclea dissimilis has a methylome but no RNA-Seq, so
+# the StringTie route used for Molanna and Xylocopa is unavailable.
+#
+# WHAT THIS ANNOTATION IS FOR, and therefore how to judge it: it exists only
+# to label each CpG exonic, intronic or intergenic. It needs COVERAGE OF GENE
+# SPACE, not per-model accuracy. Everything it misses lands in the intergenic
+# control pool, so the figure to watch is the genome partition at the end, not
+# the gene count.
+#
+# PROTEOME: Bombyx mori UP000005204, 23,640 proteins, BUSCO C:93.7%. A
+# lepidopteran is the closest well-annotated relative to a caddisfly
+# (~250 My). The project's own dmel_sp.faa was rejected for this: 3,873
+# SwissProt-only Drosophila proteins is a conserved-subset problem of the same
+# shape as BUSCO, which is what the recorded rule warns against.
+#
+# KNOWN COST, to be carried into any write-up: miniprot models coding
+# sequence, so UTRs are absent. Real 5' and 3' UTR exonic CpGs will be called
+# intronic or intergenic. That biases in the same direction as an incomplete
+# annotation, and is the price of having no RNA.
+
+set -uo pipefail
+: "${SP:?set -v SP=<label>}"
+ROOT=/work/cyberomics/lep_meth
+M=$ROOT/$SP
+FA=${FA:-$M/annot/$SP.fa}   # override for genomes whose assembly lives elsewhere (e.g. revio/)
+PROT=$ROOT/pipeline/bombyx_UP000005204.faa
+MP=$ROOT/env_busco/bin/miniprot
+mkdir -p "$M/gff" "$M/logs"
+[ -s "$FA" ] || { echo "FATAL: no assembly at $FA"; exit 1; }
+[ -x "$MP" ] || { echo "FATAL: miniprot not at $MP"; exit 1; }
+
+# FETCH INTEGRITY, 2026-09-16. The first attempt used the plain fasta stream
+# and curl exited 0 on an interrupted response: 5,497 of 23,640 records, the
+# file ending mid-sequence. UniProt's stream endpoint sends no content-length,
+# so a truncated body is indistinguishable from a complete one to curl. This
+# is the project's own recorded trap ("verify the download decompresses end to
+# end"), and the protein-count assertion below caught it only by luck of being
+# a strict threshold.
+#
+# Fetch gzipped instead and verify with `gzip -t`, which fails on a truncated
+# stream because the trailing CRC and length words are absent. Integrity is
+# then checked before anything is moved into place, and a bad fetch is retried
+# rather than cached.
+if [ ! -s "$PROT" ]; then
+    URL="https://rest.uniprot.org/uniprotkb/stream?query=proteome:UP000005204&format=fasta&compressed=true"
+    OK=0
+    for i in 1 2 3 4 5; do
+        echo "=== $(date) fetching Bombyx mori reference proteome (attempt $i)"
+        rm -f "$PROT.gz.part"
+        curl -fsSL --max-time 1800 -o "$PROT.gz.part" "$URL" || { sleep 20; continue; }
+        if gzip -t "$PROT.gz.part" 2>/dev/null; then OK=1; break; fi
+        echo "  truncated (gzip -t failed), retrying"
+        sleep 20
+    done
+    [ "$OK" = 1 ] || { echo "FATAL: could not fetch an intact proteome in 5 attempts"; exit 1; }
+    gunzip -c "$PROT.gz.part" > "$PROT.part" || { echo "FATAL: gunzip failed"; exit 1; }
+    mv "$PROT.part" "$PROT"; rm -f "$PROT.gz.part"
+fi
+NP=$(grep -c "^>" "$PROT")
+echo "proteome: $NP proteins"
+[ "$NP" -ge 15000 ] || { echo "FATAL: only $NP proteins, expected ~23,640 -- delete $PROT and rerun"; exit 1; }
+# a complete fasta ends with a newline; a stream cut mid-sequence does not
+[ -z "$(tail -c 1 "$PROT")" ] || { echo "FATAL: proteome does not end in a newline, still truncated"; exit 1; }
+
+GFFRAW=$M/gff/$SP.miniprot.raw.gff
+if [ ! -s "$GFFRAW" ]; then
+    echo "=== $(date) miniprot"
+    "$MP" -t 16 --gff "$FA" "$PROT" > "$GFFRAW.part" 2>"$M/logs/miniprot.err" \
+        || { echo "FATAL: miniprot failed: $(tail -2 $M/logs/miniprot.err)"; exit 1; }
+    mv "$GFFRAW.part" "$GFFRAW"
+fi
+echo "raw GFF feature types:"; awk -F'\t' '!/^#/{c[$3]++} END{for(t in c) printf "  %-8s %d\n", t, c[t]}' "$GFFRAW"
+
+# miniprot emits mRNA and CDS, never gene or exon. methylation_motif.py and
+# meth_partition.py key on gene and exon, and with no gene rows every intron
+# is silently called intergenic -- the exact contamination the BUSCO route was
+# rejected for. Convert: gene from the mRNA span, exon from CDS.
+GFF=$M/gff/$SP.miniprot.gff3
+if [ ! -s "$GFF" ]; then
+echo "=== $(date) converting mRNA/CDS to gene/mRNA/exon"
+"$ROOT/env_phase/bin/python3" - "$GFFRAW" "$GFF" <<'PY'
+import sys, re
+src, dst = sys.argv[1], sys.argv[2]
+n_g = n_e = 0
+with open(dst, "w") as out:
+    out.write("##gff-version 3\n")
+    for line in open(src):
+        if line.startswith("#"):
+            continue
+        f = line.rstrip("\n").split("\t")
+        if len(f) < 9:
+            continue
+        if f[2] == "mRNA":
+            i = re.search(r"ID=([^;]+)", f[8])
+            if not i:
+                continue
+            tid = i.group(1); gid = "gene_" + tid
+            out.write("\t".join(f[:2] + ["gene"] + f[3:8] + [f"ID={gid}"]) + "\n")
+            out.write("\t".join(f[:8] + [f"ID={tid};Parent={gid}"]) + "\n")
+            n_g += 1
+        elif f[2] == "CDS":
+            p = re.search(r"Parent=([^;]+)", f[8])
+            if not p:
+                continue
+            out.write("\t".join(f[:2] + ["exon"] + f[3:8] + [f"Parent={p.group(1)}"]) + "\n")
+            n_e += 1
+print(f"  wrote {n_g} genes/mRNAs and {n_e} exons", flush=True)
+PY
+fi
+NG=$(awk -F'\t' '$3=="gene"' "$GFF" | wc -l); NE=$(awk -F'\t' '$3=="exon"' "$GFF" | wc -l)
+echo "converted: $NG gene rows, $NE exon rows"
+[ "$NG" -gt 0 ] && [ "$NE" -gt 0 ] || { echo "FATAL: conversion produced no gene/exon rows"; exit 1; }
+
+echo
+echo "====== GENE-SPACE COVERAGE: the only thing that matters here ======"
+"$ROOT/env_phase/bin/python3" - "$GFF" "$FA.fai" <<'PY'
+import sys
+from collections import defaultdict
+gff, fai = sys.argv[1], sys.argv[2]
+total = sum(int(l.split("\t")[1]) for l in open(fai))
+def merge(iv):
+    iv.sort(); out=[]
+    for s,e in iv:
+        if out and s <= out[-1][1]+1: out[-1][1]=max(out[-1][1],e)
+        else: out.append([s,e])
+    return out
+g, x = defaultdict(list), defaultdict(list)
+for line in open(gff):
+    if line[0]=="#": continue
+    f=line.rstrip("\n").split("\t")
+    if len(f)<8: continue
+    if f[2]=="gene": g[f[0]].append((int(f[3]),int(f[4])))
+    elif f[2]=="exon": x[f[0]].append((int(f[3]),int(f[4])))
+gb=sum(e-s+1 for c in g for s,e in merge(g[c]))
+xb=sum(e-s+1 for c in x for s,e in merge(x[c]))
+print(f"  genome      {total/1e6:9.1f} Mb")
+print(f"  gene space  {gb/1e6:9.1f} Mb  {100*gb/total:5.1f}%")
+print(f"  exonic      {xb/1e6:9.1f} Mb  {100*xb/total:5.1f}%")
+print(f"  intronic    {(gb-xb)/1e6:9.1f} Mb  {100*(gb-xb)/total:5.1f}%")
+print(f"  intergenic  {(total-gb)/1e6:9.1f} Mb  {100*(total-gb)/total:5.1f}%")
+print()
+print("  Molanna StringTie, for scale: 25,975 genes, 44% gene space,")
+print("  4.4% exonic / 38.7% intronic / 56.9% intergenic.")
+print("  A collapsed intron class means the annotation is too sparse to use.")
+PY
+echo "==================================================================="
+echo "=== $(date) complete"

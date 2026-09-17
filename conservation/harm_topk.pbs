@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -N harm_topk
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=2:mem=16gb
+#PBS -l walltime=48:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/hassulta/
+#PBS -V
+# Size-matched top-K overlap on the real Helicoverpa comparison: the
+# grid-validated control, run with the same inputs as harm_overlap_null.
+set -uo pipefail
+ROOT=/work/cyberomics/lep_meth
+cd "$ROOT"
+"$ROOT/env_phase/bin/python3" pipeline/scripts/harm_topk.py \
+    --psi-assulta hassulta/psi --runs-assulta hassulta/runs_dev.tsv \
+    --psi-harm hassulta/psi_harm --runs-harm hassulta/runs_harm.tsv \
+    --gff hassulta/ref/Harm.gff --paf hassulta/ref/has_vs_harm.paf \
+    --out hassulta/harm_topk_sens.tsv --n-perm 10000 --k-factors 0.25,0.5,1,2

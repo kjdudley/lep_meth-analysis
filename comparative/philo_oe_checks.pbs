@@ -1,0 +1,20 @@
+#!/bin/bash
+#PBS -N philo_oe
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=4:mem=64gb
+#PBS -l walltime=03:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/molanna/logs/
+#PBS -V
+set -uo pipefail
+R=/work/cyberomics/lep_meth
+echo "############ EXONS-ONLY vs GENE-SPAN CpG o/e ############"
+echo "If Philopotamus converges on the others in EXONS but not in gene spans,"
+echo "its gene-span o/e was inflated by CpG-undepleted intronic repeat and the"
+echo "'recent methylation' reading is dead. If it stays high in exons, it lives."
+echo
+echo "=== philopotamus"; python3 $R/pipeline/scripts/philo_oe_checks.py philopotamus $R/philopotamus/annot/philopotamus.fa $R/philopotamus/gff/philopotamus.miniprot.gff3
+echo "=== ceraclea (miniprot control, same route)"; python3 $R/pipeline/scripts/philo_oe_checks.py ceraclea $R/ceraclea/annot/ceraclea.fa $R/ceraclea/gff/ceraclea.miniprot.gff3
+echo "=== harmi (miniprot control, same route)"; python3 $R/pipeline/scripts/philo_oe_checks.py harmi $R/revio/ilHelArmi9.fa $R/harmi/gff/harmi.miniprot.gff3
+echo "=== molanna (StringTie)"; python3 $R/pipeline/scripts/philo_oe_checks.py molanna $R/molanna/annot/molanna.fa $R/molanna/gff/molanna.stringtie.gff3
+echo "=== done $(date)"

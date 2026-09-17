@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N harm_onull
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=4:mem=48gb
+#PBS -l walltime=10:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/hassulta/
+#PBS -V
+set -uo pipefail
+ROOT=/work/cyberomics/lep_meth
+cd "$ROOT"
+"$ROOT/env_phase/bin/python3" pipeline/scripts/harm_overlap_null.py \
+    --psi-assulta hassulta/psi --runs-assulta hassulta/runs_dev.tsv \
+    --psi-harm hassulta/psi_harm --runs-harm hassulta/runs_harm.tsv \
+    --gff hassulta/ref/Harm.gff --paf hassulta/ref/has_vs_harm.paf \
+    --out hassulta/harm_overlap_null.tsv --n-perm 1000

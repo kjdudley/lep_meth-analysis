@@ -1,0 +1,8 @@
+statistic	value
+ortholog_pairs	2859
+observed_spearman	0.3417
+null_median	0.3484
+null_p95	0.3709
+null_max	0.3894
+p_permutation	0.6903
+n_permutations	1000

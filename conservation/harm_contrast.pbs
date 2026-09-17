@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N harm_contr
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=4:mem=48gb
+#PBS -l walltime=8:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/hassulta/
+#PBS -V
+set -uo pipefail
+ROOT=/work/cyberomics/lep_meth
+cd "$ROOT"
+"$ROOT/env_phase/bin/python3" pipeline/scripts/harm_contrast.py \
+    --psi-harm hassulta/psi_harm --runs hassulta/runs_harm.tsv \
+    --gff hassulta/ref/Harm.gff --gene2go hassulta/ref/harm_gene2go.tsv \
+    --psi-assulta hassulta/psi --runs-assulta hassulta/runs_dev.tsv \
+    --paf hassulta/ref/has_vs_harm.paf --out-prefix hassulta/harm

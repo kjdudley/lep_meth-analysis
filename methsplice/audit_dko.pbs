@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -N ms_audit_dko
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=4:mem=48gb
+#PBS -l walltime=04:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/methsplice/audit_dko.log
+#PBS -V
+set -uo pipefail
+ROOT=/work/cyberomics/lep_meth
+cd "$ROOT"
+"$ROOT/env_phase/bin/python3" pipeline/scripts/audit_dko.py
+echo "RC=$? DONE $(date)"

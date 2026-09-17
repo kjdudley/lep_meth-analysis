@@ -1,0 +1,5 @@
+k_factor	K_assulta	K_armigera	observed	expectation	null_median	null_max	p
+0.25	127	128	19	5.69	16	30	0.22398
+0.5	254	256	59	22.74	51	73	0.10619
+1	507	511	183	90.62	162	195	0.00920
+2	1014	1022	519	362.47	514	560	0.33667

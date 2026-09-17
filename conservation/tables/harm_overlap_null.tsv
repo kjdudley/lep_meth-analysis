@@ -1,0 +1,16 @@
+statistic	value
+shared_background	2859
+observed_assulta_changing	507
+observed_armigera_changing	511
+observed_overlap	183
+null_median_overlap	38
+null_max_overlap	132
+null_mean_assulta_set	224.1
+null_mean_armigera_set	226.8
+ratio_vs_null	4.815789473684211
+p_permutation_RAW_confounded	0.0010
+observed_enrichment_over_expectation	2.0195
+null_median_enrichment	2.2987
+null_max_enrichment	3.7046
+p_PRIMARY_enrichment	0.8082
+n_permutations	1000

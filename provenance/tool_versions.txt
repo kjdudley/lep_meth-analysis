@@ -1,0 +1,19 @@
+# Software versions for the analyses in this repository
+# Captured from the live conda prefixes on 2026-09-17. Interrogated directly;
+# not inferred from package metadata.
+
+samtools                       1.24
+bcftools                       1.24
+hisat2                         2.2.3
+stringtie                      3.0.3
+minimap2                       2.31-r1302
+miniprot                       0.18-r281
+pbmm2                          26.2.99
+pb-CpG-tools                   3.0.0
+
+# conda environments, exported alongside this file
+env2                           58 packages
+env_busco                      92 packages
+env                            146 packages
+env_phase                      142 packages
+env_wgbs                       47 packages

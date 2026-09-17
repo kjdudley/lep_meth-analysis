@@ -1,0 +1,5 @@
+sigma_shared_depth	mean_overlap_enrichment	mean_spearman	median_hypergeom_p	naive_hypergeom_FPR	naive_rho_FPR	permutation_overlap_FPR	permutation_rho_FPR
+0	0.985931	0.000169803	0.542525	0	0	0	0
+0.4	1.06308	0.0721881	0.310462	0.2	0.0666667	0	0
+0.8	1.2868	0.194694	0.000851133	0.966667	1	0	0
+1.2	1.47732	0.306664	4.40735e-13	1	1	0	0

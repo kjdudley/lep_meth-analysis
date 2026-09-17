@@ -1,0 +1,65 @@
+#!/bin/bash
+#PBS -N caddis_why
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=2:mem=8gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/molanna/logs/
+#PBS -V
+#
+# The two FREE tests from "WHY? 2026-09-17" in DNMT_MOTIF_SCALE.md.
+#
+# 1. DNMT1 COPY NUMBER. dnmt_family.tsv records queries AT a locus, not the
+#    number of loci, so it cannot speak to duplication. Apis carries
+#    DNMT1a/1b/1c, so an expansion is a real hypothesis for a 40-fold level
+#    difference. Distinct loci are counted by clustering DNMT1 hits on target
+#    sequence and position; a duplication shows as two well-supported clusters
+#    far apart, not as two hits 2 kb apart in one gene.
+#
+# 2. SPECIMEN SEX. Unrecorded for every caddisfly here. After the Xylocopa
+#    haploid male this is not optional. Trichoptera are diploid so the ploidy
+#    half does not recur, but sex-biased methylation does not need haplodiploidy.
+set -uo pipefail
+ROOT=/work/cyberomics/lep_meth
+P=$ROOT/qc/dnmt_pre
+
+echo "##################### 1. DNMT1 LOCI, not queries #####################"
+for f in "$P"/Molanna_angustata.dnmt.paf "$P"/Ceraclea_dissimilis.dnmt.paf \
+         "$P"/Philopotamus_montanus.dnmt.paf "$P"/Xylocopa_violacea.dnmt.paf; do
+    sp=$(basename "$f" .dnmt.paf)
+    if [ ! -s "$f" ]; then echo "  $sp: NO PAF"; continue; fi
+    # v3 PAFs label the query DNMT1|... or DNMT3|...; a bare DNMT| is v2 and
+    # carries no family label, which the project's standing trap warns about.
+    if ! cut -f1 "$f" | grep -qE '^DNMT[13]\|'; then
+        echo "  $sp: PAF IS v2 (no family labels) -- cannot be used, see CLAUDE.md"
+        continue
+    fi
+    echo "  --- $sp"
+    awk -F'\t' '$1 ~ /^DNMT1\|/ && $11>0 && ($10/$11)>0.5 {
+            print $6"\t"int($8/200000)
+        }' "$f" | sort -u \
+      | awk -F'\t' '{ n[$1"\t"$2]++ } END {
+            c=0; for (k in n) c++
+            printf "      distinct DNMT1 loci (200 kb bins, >=0.5 identity): %d\n", c
+        }'
+    awk -F'\t' '$1 ~ /^DNMT1\|/ && $11>0 && ($10/$11)>0.5 { print $6"\t"int($8/200000) }' "$f" \
+      | sort | uniq -c | sort -rn | head -5 \
+      | awk '{ printf "        %-28s bin %-6s hits=%s\n", $2, $3, $1 }'
+done
+
+echo
+echo "##################### 2. SPECIMEN SEX from ENA #####################"
+echo "  species                  run            sex / notes"
+for pair in "Molanna_angustata:ERR12085117" "Ceraclea_dissimilis:ERR12085120" \
+            "Philopotamus_montanus:ERR17229027" "Helicoverpa_armigera:ilHelArmi9"; do
+    sp=${pair%%:*}; run=${pair##*:}
+    [ "$run" = "ilHelArmi9" ] && { echo "  $sp  (see ALLELIC; DToL ilHelArmi9.1)"; continue; }
+    # run -> sample, then sample -> sex
+    S=$(curl -s --max-time 60 "https://www.ebi.ac.uk/ena/portal/api/filereport?accession=$run&result=read_run&fields=sample_accession&format=tsv" 2>/dev/null | tail -1 | cut -f2)
+    if [ -z "$S" ]; then echo "  $sp  $run  ENA LOOKUP FAILED"; continue; fi
+    X=$(curl -s --max-time 60 "https://www.ebi.ac.uk/ena/browser/api/xml/$S" 2>/dev/null \
+        | tr '<' '\n' | grep -A2 -iE 'TAG>sex|TAG>organism part|TAG>lifestage|TAG>developmental stage' \
+        | grep -iE '^VALUE>' | sed 's/^VALUE>//' | paste -sd'; ')
+    echo "  $sp  $run  $S  ${X:-no sex/tissue attributes recorded}"
+done
+echo "=== done $(date)"

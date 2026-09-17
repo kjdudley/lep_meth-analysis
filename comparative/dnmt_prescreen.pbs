@@ -1,0 +1,123 @@
+#!/bin/bash
+#PBS -N dnmt_prescreen
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=8:mem=32gb
+#PBS -l walltime=04:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/qc/dnmt/
+#PBS -V
+
+# Confirm a candidate is DNMT-absent BEFORE paying to measure it.
+#
+#   qsub -v LIST=diptera_probe.tsv,PROBED=chunk_diptera scripts/dnmt_prescreen.pbs
+#
+# WHY THIS ORDER. Expanding the unmethylated reference set is what tightens the
+# limit of detection -- section 2.3's deliverable -- because LoD = mean + 3 SD and
+# the SE of an SD estimate goes as SD/sqrt(2(n-1)). Going from n=12 to n=24 cuts
+# that from about +-21% to +-15%.
+#
+# But it only works if every genome added really is unmethylated. A dipteran that
+# retains DNMT1 would contaminate the reference set with real methylation and
+# inflate the floor -- the exact opposite of the intent, and invisible afterwards
+# because the floor is *defined* on these genomes. There is no internal check.
+#
+# The assembly is ~500 MB and the reads are ~20 GB, and DNMT presence needs only
+# the assembly. So screen first, download second: a wrong call here costs a
+# 40-fold smaller download, and the answer is orthogonal to any methylation call.
+#
+# THIS IS NOT ASSUMED FROM THE CLADE. Eight dipterans are DNMT-absent, but
+# Diptera is a large order and the candidate pool includes Culicidae, where
+# low-level methylation has been reported. If some dipteran lineage retains the
+# enzyme, that is worth knowing on its own and must not be discovered by
+# averaging it into the floor.
+
+set -uo pipefail
+ROOT=/work/cyberomics/lep_meth
+P=$ROOT/pipeline
+Q=$ROOT/qc/dnmt_pre
+LIST=${LIST:?set -v LIST=<probe tsv>}
+PROBED=${PROBED:?set -v PROBED=<chunk prefix>}
+export PATH=$ROOT/env_busco/bin:$ROOT/env2/bin:$PATH
+mkdir -p "$Q"
+
+# Default is the animal set. For non-animal clades pass QUERYSET explicitly —
+# fungal DNA methyltransferases (DIM-2, RID, Masc1, DNMT5) share no close
+# homology with animal DNMT1/DNMT3, so screening fungi with the animal set
+# would report false absences for every genome and the TRDMT1 control would
+# not catch it (fungal Dnmt2 needs a fungal query too; dnmt_queries_fungi.faa
+# carries Pmt1 and yeast actin as its controls).
+QUERY=$P/${QUERYSET:-dnmt_queries_v3.faa}
+[ -s "$QUERY" ] || { echo "FATAL: no query set at $QUERY"; exit 1; }
+
+# species confirmed to carry deposited calls by the tag probe
+# The candidate list is per-chunk, not shared: two prescreens running at once
+# would otherwise overwrite each other's usable.txt.
+CAND=$Q/usable_${PROBED}.txt
+
+# SPECIES_LIST is an explicit alternative to deriving candidates from a tag
+# probe. Genotyping needs only the assembly, so requiring a tag verdict first
+# would gate a cheap question behind an unrelated one -- but the verdict must
+# not be forged either: writing "USABLE" into a probed file to get past this
+# check would mean "tags verified" when nothing had been verified. So the two
+# gates are kept separate and named. Tag verification remains REQUIRED before
+# any genome from this route is measured for methylation.
+if [ -n "${SPECIES_LIST:-}" ]; then
+    [ -s "$SPECIES_LIST" ] || { echo "FATAL: no SPECIES_LIST at $SPECIES_LIST"; exit 1; }
+    awk -F'\t' 'NR>1 && $1!=""{print $1}' "$SPECIES_LIST" | sort -u > "$CAND.all"
+    # lane split so 238 assemblies fit inside a 4 h wall
+    LANE=${LANE:-0}; NLANES=${NLANES:-1}
+    awk -v l="$LANE" -v n="$NLANES" 'NR % n == l' "$CAND.all" > "$CAND"
+    echo "=== SPECIES_LIST route: lane $LANE of $NLANES, $(wc -l < "$CAND") of $(wc -l < "$CAND.all") species"
+else
+shopt -s nullglob
+PROBEDFILES=($P/${PROBED}_*_probed.tsv)
+shopt -u nullglob
+if [ ${#PROBEDFILES[@]} -eq 0 ]; then
+    echo "FATAL: no probed files match $P/${PROBED}_*_probed.tsv"
+    echo "  available prefixes:"
+    ls $P/chunk_*_probed.tsv 2>/dev/null | sed 's|.*/||; s|_[0-9]*_probed.tsv||' | sort -u | sed 's/^/    /'
+    exit 1
+fi
+awk -F'\t' 'FNR>1 && $10=="USABLE"{print $1}' "${PROBEDFILES[@]}" 2>/dev/null \
+    | sort -u > "$CAND"
+fi
+NCAND=$(wc -l < "$CAND")
+echo "=== $(date) $NCAND USABLE candidates to prescreen from ${#PROBEDFILES[@]} probed file(s)"
+# A run that screens nothing must NOT go on to summarise the directory: it would
+# report whatever PAFs happen to be there as though they were this run's result.
+# Five prescreens did exactly that, each printing an identical 56-species Diptera
+# summary while doing no work and exiting 0.
+[ "$NCAND" -gt 0 ] || { echo "FATAL: no USABLE candidates — nothing to screen"; exit 1; }
+
+n=0
+while read -r SP; do
+    [ -n "$SP" ] || continue
+    SAFE=$(echo "$SP" | tr ' ' '_')
+    ACC=$(awk -F'\t' -v s="$SP" '$1==s{print $4; exit}' "$P/$LIST")
+    [ -n "$ACC" ] || { echo "  $SAFE: no assembly accession"; continue; }
+    FA=$Q/$SAFE.fa
+    if [ ! -s "$FA" ]; then
+        bash "$P/scripts/fetch_assembly.sh" "$ACC" "$FA" >/dev/null 2>&1 \
+            || { echo "  $SAFE: assembly fetch failed ($ACC)"; continue; }
+    fi
+    [ -s "$FA" ] || continue
+    PAF=$Q/$SAFE.dnmt.paf
+    if [ ! -s "$PAF" ]; then
+        miniprot -t 8 --outs=0.4 "$FA" "$QUERY" > "$PAF.part" 2>/dev/null \
+            && mv "$PAF.part" "$PAF" || { echo "  $SAFE: miniprot failed"; rm -f "$PAF.part"; continue; }
+    fi
+    # the assembly is large and no longer needed once the PAF exists
+    rm -f "$FA" "$FA.fai"
+    n=$((n+1))
+done < "$CAND"
+echo "=== $(date) prescreened $n assemblies for $PROBED"
+[ "$n" -gt 0 ] || { echo "FATAL: 0 assemblies prescreened despite $NCAND candidates"; exit 1; }
+echo "=== species screened in THIS run (the summary below covers the whole directory) ==="
+sed 's/ /_/g' "$CAND" | sed 's/^/    /' | head -60
+
+echo
+"$ROOT/env_phase/bin/python3" "$P/scripts/dnmt_call.py" --dir "$Q"
+echo
+echo "  Download reads ONLY for species reporting 'DNMT ABSENT (both controls ok)'."
+echo "  Anything with DNMT present is a methylated candidate, not a floor genome,"
+echo "  and belongs in the biology rather than the reference set."

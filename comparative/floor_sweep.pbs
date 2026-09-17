@@ -1,0 +1,71 @@
+#!/bin/bash
+#PBS -N floor_sweep
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=4:mem=48gb
+#PBS -l walltime=08:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/lowmeth/
+
+# Section 2.3, second axis: the floor as a function of THRESHOLD, not just
+# coverage. The >=50% cut has never been justified by measurement -- it was
+# picked because its false-positive rate is observably zero, which speaks to
+# specificity and says nothing about the sensitivity it costs. This makes the
+# choice a derived optimum, and answers whether this chemistry can see
+# intermediate methylation at all.
+#
+#   qsub scripts/floor_sweep.pbs
+#
+# Reads each combined.bed.gz ONCE and accumulates every threshold and both score
+# columns in that pass. Done naively -- one lowmeth_test.py invocation per
+# threshold per species -- this would re-read a ~180 MB gzipped bed 448 times.
+#
+# Runs on the SAME beds as floor24, so no re-calling, no re-alignment, no
+# downloads. Pure stdlib python: no numpy, so the env2/env_phase trap that cost
+# three jobs on 2026-08-12 cannot fire here.
+
+set -uo pipefail
+ROOT=/work/cyberomics/lep_meth
+L=$ROOT/lowmeth
+S=$L/sweep
+export PATH=$ROOT/env2/bin:$PATH
+mkdir -p "$S"
+
+run() {  # label bed mt
+    [ -s "$2" ] || { echo "skip $1: no bed"; return; }
+    python3 "$ROOT/pipeline/scripts/floor_sweep.py" --bed "$2" --label "$1" \
+        --mt "${3:-}" --out "$S/$1.sweep.tsv" || echo "  !! failed $1"
+}
+
+echo "=== $(date) sweeping thresholds 10..70 over every called genome"
+for BED in "$ROOT"/revio/*.combined.bed.gz; do
+    SP=$(basename "$BED" .combined.bed.gz)
+    run "$SP" "$BED" "$(head -1 "$ROOT/revio/$SP.mt" 2>/dev/null)"
+done
+run xylo "$ROOT/xylo/xylo.combined.bed.gz" ""
+
+echo
+echo "=== $(date) sweeps written: $(ls "$S"/*.sweep.tsv 2>/dev/null | wc -l)"
+
+# The unmethylated set. C. dolens is EXCLUDED deliberately -- it is the
+# anomalous species section 2.2 removed from the control set, and its BUSCO
+# enrichment has not yet been re-scored on the correct lineage. Species absent
+# from disk are reported by the summary rather than silently dropped.
+UNMETH=Acidia_cognata,Acupalpus_dubius,Aethecerus_discolor,Beris_morrisii,Calliphora_loewi,Campiglossa_producta,Clogmia_albipunctata,Caenorhabditis_elegans,Caenorhabditis_portoensis
+# Known-methylated comparators: the best-covered moths, flat across 30-99x.
+METH=ilNocJanh1,ilApaCren1,ilPluFest1
+
+for ST in model raw; do
+    echo
+    echo "############################################################"
+    echo "###  SCORE COLUMN: $ST"
+    echo "############################################################"
+    python3 "$ROOT/pipeline/scripts/floor_sweep_summary.py" \
+        --dir "$S" --unmeth "$UNMETH" --meth "$METH" --score-type "$ST"
+done
+
+echo
+echo "=== $(date) done"
+echo "A ratio that collapses as the threshold falls means the floor is eating"
+echo "the signal. A moth rate that climbs FASTER than the floor means there is"
+echo "real intermediate methylation the >=50% cut is discarding. Those are"
+echo "different findings -- read the moth column on its own before the ratio."

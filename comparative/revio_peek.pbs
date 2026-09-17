@@ -1,0 +1,33 @@
+#!/bin/bash
+#PBS -N revio_peek2
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=2:mem=8gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/molanna/logs/
+#PBS -V
+# Which Trichoptera deposits actually carry 5mC? Streams headers and first
+# reads from ENA; downloads nothing.
+#
+# SUPERSEDES job 25400281, whose regex matched on the MM:Z: prefix and so read
+# only the FIRST spec in a multi-code tag. An MM tag is semicolon separated --
+# "MM:Z:A+a.,...;C+m?,...;T-a,..." -- so a deposit listing 6mA first looked
+# like it had no 5mC. That mistake rejected ERR17229027, the only Annulipalpia
+# in the set. Strip the prefix, split on ';', then match each spec.
+set -uo pipefail
+SAM=/work/cyberomics/direct_methylation/env/bin/samtools
+printf "  %-26s %-13s %-10s %s\n" SPECIES RUN CALLER "MM CODES (all specs)"
+while IFS=$'\t' read -r SP RUN URL; do
+  [ -n "${RUN:-}" ] || continue
+  CODES=$("$SAM" view "https://$URL" 2>/dev/null | head -300 \
+          | grep -oE 'MM:Z:[^[:space:]]+' | sed 's/MM:Z://' | tr ';' '\n' \
+          | grep -oE '^[A-Z][+-][a-z0-9]+' | sort | uniq -c \
+          | awk '{printf "%s(%s) ", $2, $1}')
+  PG=$("$SAM" view -H "https://$URL" 2>/dev/null \
+       | grep -oE 'ID:(jasmine|primrose|ccs)' | sed 's/ID://' | sort -u | tr '\n' ',' )
+  printf "  %-26s %-13s %-10s %s\n" "$SP" "$RUN" "${PG:-?}" "${CODES:-NONE}"
+done < /work/cyberomics/lep_meth/pipeline/revio_peek.tsv
+echo
+echo "  C+m present = usable for this analysis. A+a alongside is the documented"
+echo "  6mA case and requires slicing by MM code downstream, not rejection."
+echo "=== done $(date)"

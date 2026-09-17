@@ -1,0 +1,96 @@
+#!/bin/bash
+#PBS -N caddis_floor
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=4:mem=32gb
+#PBS -l walltime=04:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/molanna/logs/
+#PBS -V
+#
+#   qsub -v SP=molanna,MT=OY754991.1 pipeline/scripts/caddis_floor.pbs
+#
+# CORRECTION, 2026-09-15. The Molanna and Ceraclea methylomes were reported
+# with a >=50% threshold, no coverage band, and a mitochondrial "noise floor".
+# All three are wrong against this project's own settled standard, and the
+# mitochondrial part was rejected in manuscript_paper1_gr.md before I used it:
+#
+#   "the internal controls a reuse study would reach for first, the
+#    mitochondrion and the genome mean, both fail"
+#
+#   "It carries only 78 to 208 CpG sites across the panel's insects, so a
+#    single false positive moves its estimate by 0.5% to 1.3% ... The
+#    mitochondrion supports an upper bound of about 1% and cannot supply a
+#    floor."
+#
+# The standard is instead: the fraction of sites called at or above 70%
+# WITHIN A 30x-79x COVERAGE BAND, with the site count the band contains,
+# excluding bands beyond about twice a genome's modal coverage, against a
+# floor measured on an unmethylated out-group of the same chemistry.
+#
+# Comparators already in results/lowmeth/hi70/:
+#   Acidia cognata (unmethylated out-group)  0.0759%  over 29.0M sites
+#   ilHelArmi9 (H. armigera)                 0.2925%  over 12.3M sites
+#   xylo (Xylocopa violacea)                 0.1414%  over 61.7M sites
+#
+# Against those, the 11.91% I reported for Molanna at >=50% unbanded is two
+# orders of magnitude out, and Molanna's 24.4x mean coverage sits BELOW the
+# band entirely, where the floor is highest. The abundance interpretation of
+# the step-3 motif result depends on this number, so it has to be measured
+# properly before that interpretation stands.
+#
+# floor_sweep.py reads the bed once and accumulates every threshold and both
+# score columns, binned by coverage, so the band can be applied downstream.
+# Its --mt argument reports the mitochondrion APART, which is the correct
+# treatment: a side note, never the control.
+
+set -uo pipefail
+: "${SP:?set -v SP=<label>}"
+ROOT=/work/cyberomics/lep_meth
+M=$ROOT/$SP
+BED=$M/$SP.combined.bed.gz
+OUT=$M/$SP.sweep.tsv
+MT=${MT:-}
+[ -s "$BED" ] || { echo "FATAL: no bed at $BED"; exit 1; }
+mkdir -p "$M/logs"
+
+echo "=== $(date) floor sweep for $SP"
+python3 "$ROOT/pipeline/scripts/floor_sweep.py" --bed "$BED" --label "$SP" \
+    ${MT:+--mt "$MT"} --out "$OUT" || { echo "FATAL: floor_sweep failed"; exit 1; }
+[ -s "$OUT" ] || { echo "FATAL: no sweep table"; exit 1; }
+echo "wrote $OUT ($(grep -c . "$OUT") rows)"
+
+echo
+echo "============ $SP AT THE PROJECT STANDARD ============"
+python3 - "$OUT" "$SP" <<'PY'
+import sys, csv
+from collections import defaultdict
+rows = list(csv.DictReader(open(sys.argv[1]), delimiter="\t"))
+cols = rows[0].keys() if rows else []
+print("  sweep columns:", ", ".join(cols))
+# band 30-79x, threshold 70, raw counts preferred over the model column
+band = defaultdict(lambda: [0, 0])
+for r in rows:
+    try:
+        cov = float(r.get("cov_bin") or r.get("coverage") or -1)
+        th  = float(r.get("threshold") or -1)
+        n   = float(r.get("n") or r.get("sites") or 0)
+        h   = float(r.get("hits") or 0)
+    except (TypeError, ValueError):
+        continue
+    st = (r.get("score_type") or r.get("score") or "raw")
+    if th == 70 and 30 <= cov <= 79:
+        b = band[st]; b[0] += h; b[1] += n
+for st, (h, n) in sorted(band.items()):
+    if n:
+        print(f"  {st:8s} >=70% in 30-79x band: {h:.0f} of {n:.0f} sites = {100*h/n:.4f}%")
+if not band:
+    print("  (band/threshold columns not found under the expected names --")
+    print("   inspect the sweep table before interpreting)")
+print()
+print("  comparators (results/lowmeth/hi70/):")
+print("    Acidia cognata  0.0759%   unmethylated out-group, the floor")
+print("    ilHelArmi9      0.2925%   H. armigera")
+print("    xylo            0.1414%   Xylocopa violacea")
+PY
+echo "====================================================="
+echo "=== $(date) complete"

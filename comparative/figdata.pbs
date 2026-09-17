@@ -1,0 +1,49 @@
+#!/bin/bash
+#PBS -N figdata
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=4:mem=16gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/molanna/logs/
+#PBS -V
+#
+# Emits the exact tables the manuscript figures are drawn from, so the figures
+# are built from artefacts rather than from numbers retyped out of a log.
+#   fig_deciles.tsv : species, decile, n_sites, pct_of_sites
+#   fig_covbins.tsv : species, cov_bin, n_sites, n_hits_ge70, pct_ge70
+# bed columns: 1 chrom, 2 start, 3 end, 4 pct methylation, 5 label, 6 coverage.
+set -uo pipefail
+R=/work/cyberomics/lep_meth
+O=$R/figs; mkdir -p "$O"
+D=$O/fig_deciles.tsv; C=$O/fig_covbins.tsv
+printf "species\tdecile\tn_sites\tpct_of_sites\n" > "$D"
+printf "species\tcov_bin\tn_sites\tn_hits_ge70\tpct_ge70\n" > "$C"
+
+run () {
+  local sp="$1" bed="$2"
+  [ -s "$bed" ] || { echo "FATAL: no bed for $sp at $bed"; return 1; }
+  echo "=== $sp  $(date +%H:%M:%S)"
+  zcat "$bed" | grep -v '^#' | awk -v SP="$sp" -v D="$D" -v C="$C" '
+    { n++
+      b=int($4/10); if(b>9) b=9; dec[b]++
+      cb=int($6/10)*10; if(cb>150) cb=150
+      cn[cb]++; if($4>=70) ch[cb]++ }
+    END {
+      for(i=0;i<10;i++) printf "%s\t%d\t%d\t%.4f\n", SP, i*10, dec[i], 100*dec[i]/n >> D
+      for(k in cn) printf "%s\t%d\t%d\t%d\t%.4f\n", SP, k, cn[k], ch[k], (cn[k]? 100*ch[k]/cn[k] : 0) >> C
+    }'
+}
+run molanna       $R/molanna/molanna.combined.bed.gz
+run ceraclea      $R/ceraclea/ceraclea.combined.bed.gz
+run philopotamus  $R/philopotamus/philopotamus.combined.bed.gz
+run harmi         $R/revio/ilHelArmi9.combined.bed.gz
+
+for f in "$D" "$C"; do
+  r=$(( $(wc -l < "$f") - 1 ))
+  [ "$r" -gt 0 ] || { echo "FATAL: $f is empty"; exit 1; }
+  echo "wrote $f : $r rows"
+done
+# NB: do NOT plain-sort this file. `sort -k1,1` moves the header line into the
+# body (it sorted to line 65 on the first run). Sort the body only.
+{ head -1 "$C"; tail -n +2 "$C" | sort -k1,1 -k2,2n; } > "$C.s" && mv "$C.s" "$C"
+echo "=== done $(date)"

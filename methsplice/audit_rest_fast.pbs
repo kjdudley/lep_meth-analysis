@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -N ms_audit_fast
+#PBS -q cpu_batch
+#PBS -l select=1:ncpus=4:mem=48gb
+#PBS -l walltime=06:00:00
+#PBS -j oe
+#PBS -o /work/cyberomics/lep_meth/methsplice/audit_rest_fast.log
+#PBS -V
+set -uo pipefail
+ROOT=/work/cyberomics/lep_meth
+cd "$ROOT"
+"$ROOT/env_phase/bin/python3" -c "import numpy; print('numpy', numpy.__version__)" || exit 1
+for P in mouse pos; do
+    echo "##### $(date) part $P"
+    "$ROOT/env_phase/bin/python3" pipeline/scripts/audit_rest.py "$P"
+    echo "##### part $P rc=$?"
+done
+echo "ALL PARTS DONE $(date)"
