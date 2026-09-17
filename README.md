@@ -72,6 +72,15 @@ native dipteran floor panel.
 | `gene_oe_meth.py` / `.pbs` | CpG observed/expected against measured methylation, per gene |
 | `philo_oe_checks.py` / `.pbs` | the exon-only and repeat-masked o/e controls |
 | `dnmt_prescreen.pbs`, `dnmt_family_call.py` | methyltransferase family calls |
+
+`comparative/queries/dnmt_queries_v3.faa` is the query set the genotype calls
+depend on: 47 sequences, 18 DNMT1 (11 insect, 7 vertebrate), 14 DNMT3 (all
+insect), 9 TRDMT1 and 6 actin. **The DNMT3 set is insect-only**, which is what
+makes an absence call interpretable within insects and also why this set must
+not be used to genotype non-insects: it is under-sensitive outside the clade it
+was built from. A family call requires two independent queries of the same
+family at one locus; a single hit is not evidence, because one widely annotated
+TrEMBL entry scores every lepidopteran DNMT3-positive on its own.
 | `figdata.pbs`, `make_figures.py` | figure data and the figures |
 
 `comparative/tables/floor/` holds the per-genome floor tables for the whole

@@ -1,0 +1,16 @@
+species	run	instrument	assembly	est_cov	asm_mb	bam
+Adicella reducta	ERR16090198	Revio	GCA_978045095	48.9	414.9	ftp.sra.ebi.ac.uk/vol1/run/ERR160/ERR16090198/m84098_251212_214724_s2.hifi_reads.bc2082.bam
+Ceraclea albimacula	ERR17404614	Revio	GCA_986264805	46.8	587.0	ftp.sra.ebi.ac.uk/vol1/run/ERR174/ERR17404614/m84093_260108_211738_s4.hifi_reads.bc2037.bam
+Ceraclea dissimilis	ERR12085120	Sequel IIe	GCA_963576895	56.2	452.8	ftp.sra.ebi.ac.uk/vol1/run/ERR120/ERR12085120/m64222e_230923_052505.hifi_reads.bc2048--bc2048.bam
+Glyphotaelius pellucidus	ERR8575402	Sequel II	GCA_936435175	21.9	1037.1	ftp.sra.ebi.ac.uk/vol1/run/ERR857/ERR8575402/m64125_201205_110751.ccs.bc1008_BAK8A_OA--bc1008_BAK8A_OA.bam
+Leptocerus tineiformis	ERR15996666	Revio	GCA_978019925	87.8	455.4	ftp.sra.ebi.ac.uk/vol1/run/ERR159/ERR15996666/m84098_251117_121558_s1.hifi_reads.bc2001.bam
+Limnephilus auricula	ERR11483513	Sequel IIe	GCA_951813805	26.6	971.3	ftp.sra.ebi.ac.uk/vol1/run/ERR114/ERR11483513/m64089e_230517_122338.ccs.bc2066--bc2066.bam
+Limnephilus lunatus	ERR6939235	Sequel IIe	GCA_917563855	19.2	1270.2	ftp.sra.ebi.ac.uk/vol1/run/ERR693/ERR6939235/m64228e_210425_053808.ccs.bc1017_BAK8B_OA--bc1017_BAK8B_OA.bam
+Limnephilus marmoratus	ERR6807999	Sequel II	GCA_917880885	14.9	1630.0	ftp.sra.ebi.ac.uk/vol1/run/ERR680/ERR6807999/m64125_201206_113557.ccs.bc1012_BAK8A_OA--bc1012_BAK8A_OA.bam
+Limnephilus rhombicus	ERR7979914	Sequel IIe	GCA_929108145	13.2	1578.8	ftp.sra.ebi.ac.uk/vol1/run/ERR797/ERR7979914/m64230e_210517_123059.ccs.bc1003_BAK8A_OA--bc1003_BAK8A_OA.bam
+Molanna angustata	ERR12085117	Sequel IIe	GCA_963576475	25.4	994.9	ftp.sra.ebi.ac.uk/vol1/run/ERR120/ERR12085117/m64178e_230923_035959.hifi_reads.bc2066--bc2066.bam
+Mystacides azureus	ERR12370421	Sequel IIe	GCA_965644405	39.9	622.4	ftp.sra.ebi.ac.uk/vol1/run/ERR123/ERR12370421/m64229e_220923_143252.ccs.bc1018_BAK8B_OA--bc1018_BAK8B_OA.bam
+Mystacides longicornis	ERR12102452	Sequel IIe	GCA_963576905	45.7	665.1	ftp.sra.ebi.ac.uk/vol1/run/ERR121/ERR12102452/m64229e_230927_235233.hifi_reads.bc2012--bc2012.bam
+Odontocerum albicorne	ERR10879934	Sequel IIe	GCA_949825065	21.2	1287.3	ftp.sra.ebi.ac.uk/vol1/run/ERR108/ERR10879934/m64125e_230128_145218.ccs.bc1011_BAK8A_OA--bc1011_BAK8A_OA.bam
+Philopotamus montanus	ERR17229027	Revio	GCA_984577355	57.9	517.8	ftp.sra.ebi.ac.uk/vol1/run/ERR172/ERR17229027/m84093_260424_191856_s1.hifi_reads.bc2035.bam
+Trichostegia minor	ERR15951381	Revio	GCA_977872445	25.0	771.3	ftp.sra.ebi.ac.uk/vol1/run/ERR159/ERR15951381/m84098_251112_181257_s4.hifi_reads.bc2012.bam
