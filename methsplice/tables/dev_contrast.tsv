@@ -1,0 +1,8 @@
+contrast	n1	n2	n_exon	observed	null_median	null_max	n_splits	p_exact	enrichment
+larva4_vs_larva5	3	3	49554	3865	2212	2640	18	0.0526	1.75
+larva5_vs_pupa	3	6	44635	5668	1939	3836	83	0.0119	2.92
+pupa_vs_adult	6	6	42590	4747	2053	3784	922	0.0011	2.31
+pupaM_vs_pupaF	3	3	51564	3161	3025	3745	18	0.3684	1.04
+adultM_vs_adultF	3	3	47277	4445	4130	6732	18	0.4737	1.08
+ceiling_constitutive	NA	NA	24426	12670	NA	NA	NA	NA	0.5187
+ceiling_alternative	NA	NA	12795	290	NA	NA	NA	NA	0.0227

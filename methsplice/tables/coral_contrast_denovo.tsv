@@ -1,0 +1,8 @@
+test	cell	n_exon	value	ci_lo	ci_hi	null
+dose_response	un183	46960	+0.000090	-0.000072	+0.000251	NA
+dose_response	un185	46960	+0.000116	-0.000024	+0.000272	NA
+dose_response	up183	46960	+0.000017	-0.000140	+0.000191	NA
+dose_response	up185	46960	-0.000105	-0.000270	+0.000050	NA
+within_exon_r	ALL	40972	+0.0008	-0.0031	+0.0028	-0.0003
+ceiling	meth>=50	10071	0.8470	NA	NA	NA
+ceiling	meth<10	34732	0.8158	NA	NA	NA

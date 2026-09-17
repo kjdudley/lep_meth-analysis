@@ -1,0 +1,13 @@
+contrast	n_exon	mean_erasure_pct	test	slope	ci_lo	ci_hi
+degron_d1aid_Day6	17148	-21.66	baseline_meth	-0.000034	-0.000047	-0.000022
+degron_d1aid_Day6	17148	-21.66	measured_derasure	-0.000015	-0.000030	-0.000001
+degron_d1aid_Day8	19580	-21.83	baseline_meth	-0.000020	-0.000037	-0.000005
+degron_d1aid_Day8	19580	-21.83	measured_derasure	-0.000006	-0.000026	+0.000016
+degron_dual_Day6	18309	-48.91	baseline_meth	-0.000029	-0.000044	-0.000016
+degron_dual_Day6	18309	-48.91	measured_derasure	-0.000016	-0.000030	-0.000002
+degron_dual_Day8	5329	-49.21	baseline_meth	-0.000018	-0.000059	+0.000020
+degron_dual_Day8	5329	-49.21	measured_derasure	-0.000012	-0.000051	+0.000025
+degron_u1aid_Day6	13667	-40.06	baseline_meth	-0.000034	-0.000048	-0.000019
+degron_u1aid_Day6	13667	-40.06	measured_derasure	-0.000027	-0.000042	-0.000014
+degron_u1aid_Day8	19541	-43.52	baseline_meth	-0.000027	-0.000043	-0.000011
+degron_u1aid_Day8	19541	-43.52	measured_derasure	-0.000023	-0.000041	-0.000007

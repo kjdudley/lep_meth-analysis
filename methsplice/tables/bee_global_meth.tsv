@@ -1,0 +1,14 @@
+cov_floor	group	n_sites	mod_reads	tot_reads	weighted_pct	mean_site_pct
+1	control	9619351	2856429	255944482	1.1160	1.2039
+1	knockdown	9524664	1730110	203154737	0.8516	1.0794
+3	control	9522940	2854088	255797204	1.1158	1.2000
+3	knockdown	9225086	1721498	202702733	0.8493	1.0524
+5	control	9399058	2847045	255359922	1.1149	1.1946
+5	knockdown	8903158	1700660	201572613	0.8437	1.0237
+10	control	8968268	2797197	252276240	1.1088	1.1743
+10	knockdown	7971691	1582207	194971519	0.8115	0.9329
+#
+# cov>=1	weighted 1.1160 -> 0.8516 (23.69% reduction)	mean-site 1.2039 -> 1.0794 (10.34% reduction)
+# cov>=3	weighted 1.1158 -> 0.8493 (23.88% reduction)	mean-site 1.2000 -> 1.0524 (12.30% reduction)
+# cov>=5	weighted 1.1149 -> 0.8437 (24.33% reduction)	mean-site 1.1946 -> 1.0237 (14.31% reduction)
+# cov>=10	weighted 1.1088 -> 0.8115 (26.81% reduction)	mean-site 1.1743 -> 0.9329 (20.55% reduction)

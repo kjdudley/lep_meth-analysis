@@ -1,0 +1,6 @@
+contrast	genes_s1	s1_dslope	s1_null	s1_z	s2_posshift	s2_z	novel_g1	novel_g2	novel_ratio
+mouse_TKOvWT_2i	5847	0.3813	-0.0	3.77	-0.0651	-0.4	424	17410	0.02
+mouse_TKOvWT_serum	5948	0.3867	-0.0	3.68	-0.0601	0.37	612	12517	0.05
+K562_DNMT1i_3d	548	-0.0449	0.0	-1.04	-0.0675	-0.02	388	270	1.44
+HCT116_DNMT1i_3d	453	0.031	-0.0	0.7	-0.0711	-1.4	707	400	1.77
+HCT116_DKO_vs_WT	5074	-0.0276	0.0	-2.98	-0.0401	15.08	15670	3848	4.07

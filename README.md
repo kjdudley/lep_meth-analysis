@@ -28,6 +28,7 @@ the same genes cross thresholds in both species without conserved regulation.
 | `harm_contrast.py` | per-exon PSI and the group contrasts the above consume |
 | `sim_conservation_artefact.py` | simulation with zero conserved regulation |
 | `sim_conservation_grid.py` | the 36-cell design grid across group size, threshold and heterogeneity |
+| `mp_fig1_collapse.py`, `mp_fig2_sim.py`, `mp_fig3_mechanism.py` | the three figures |
 
 **Seeding.** `harm_overlap_null.py` and `harm_topk.py` use `random.Random(23)`,
 `harm_spearman.py` uses `random.Random(31)`, and the simulations derive their
@@ -40,9 +41,20 @@ and false-positive rate is therefore exactly reproducible.
 Assemblies GCA_050947285.1 and GCF_030705265.1. Run manifests are in
 `conservation/tables/`.
 
-Derived tables in `conservation/tables/` are sufficient to reproduce every
-figure and statistic **without re-running alignment**, which is the expensive
-stage.
+**What reproduces from this repository, and what does not.** The three figure
+scripts (`mp_fig1_collapse.py`, `mp_fig2_sim.py`, `mp_fig3_mechanism.py`) run
+from the tables in `conservation/tables/` as shipped: the permutation null
+distributions and the simulation grid are there. The simulations
+(`sim_conservation_*.py`) also run as shipped, since they generate their own
+data from seeded pseudo-random numbers.
+
+What is **not** here is the per-exon PSI matrices, which are 155 MB across 36
+files and sit above what belongs in a git repository. Re-running
+`harm_overlap_null.py`, `harm_spearman.py` or `harm_topk.py` from scratch
+therefore requires either those matrices from the Zenodo deposit or
+regenerating them from the archive accessions with `harm_contrast.py`. The
+tables shipped here are the outputs of that stage, so every number and figure
+in the paper can be checked without it.
 
 ### `comparative/` — Caddisfly gene body methylation
 
@@ -63,8 +75,10 @@ native dipteran floor panel.
 | `figdata.pbs`, `make_figures.py` | figure data and the figures |
 
 `comparative/tables/floor/` holds the per-genome floor tables for the whole
-77-genome panel; `panel_registry.tsv` carries the clade and library class for
-each, which determines panel membership.
+77-genome panel, and `panel_registry.tsv` carries the clade and library class
+for each, which determines panel membership. `make_figures.py` runs from these
+plus `fig_deciles.tsv`, `fig_covbins.tsv` and the four `*.gene_oe_meth.tsv`
+files, all shipped, so all four figures reproduce from this repository alone.
 
 ### `methsplice/` — No evidence that DNA methylation instructs exon inclusion
 
@@ -72,6 +86,9 @@ Audit and figure code for the perturbation, dose-response and dynamics
 reanalysis. `ms_consistency.py` is the manuscript consistency checker: it tests
 that the paper matches its own artefacts, and it carries guards that fail if
 withdrawn claims are reintroduced. It proves transcription, not correctness.
+
+`methsplice/tables/` holds all seventeen tables the audit and figure scripts
+read, so they run from this repository as shipped.
 
 ---
 

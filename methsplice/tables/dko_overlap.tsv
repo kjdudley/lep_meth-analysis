@@ -1,0 +1,5 @@
+rule	class	n_exon	obs_rate	null_rate	excess_exons	share
+overlap	novel_junction_genes	6896	0.2164	0.1167	687.0	0.2441
+overlap	other_genes	88038	0.0902	0.0660	2127.0	0.7559
+proximity	novel_junction_genes	25499	0.1377	0.0873	1286.0	0.4570
+proximity	other_genes	69435	0.0853	0.0633	1528.0	0.5430

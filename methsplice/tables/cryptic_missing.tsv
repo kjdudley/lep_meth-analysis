@@ -1,0 +1,5 @@
+contrast	genes_s1	s1_dslope	s1_null	s1_z	s2_posshift	s2_z	novel_g1	novel_g2	novel_ratio
+degron_d1aid_Day6	5780	0.012	0.0	0.45	-0.0888	-0.19	918	602	1.52
+degron_u1aid_Day2	4513	0.3378	-0.0	2.81	-0.0796	-1.36	949	1429	0.66
+degron_u1aid_Day6	5909	-0.0027	0.0	-0.12	-0.0922	-1.21	1888	355	5.32
+degron_u1aid_Day8	5187	0.5367	0.0	2.89	-0.0757	-0.14	1944	1074	1.81
