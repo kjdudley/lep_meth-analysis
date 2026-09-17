@@ -20,7 +20,10 @@ from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 import numpy as np
 
 # Repo-relative: tables ship in conservation/tables/ in this repository.
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tables")
+_HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.join(_HERE, "tables")      # inputs ship here
+OUTDIR = _HERE                             # figures are written beside the script
+os.makedirs(os.path.join(OUTDIR, "figures"), exist_ok=True)
 grid = list(csv.DictReader(open(os.path.join(ROOT, "sim_conservation_grid.tsv")), delimiter="\t"))
 INK = "#1a1a2e"
 BLUE, ORANGE, GREEN = "#2a78d6", "#eb6834", "#2e8b57"

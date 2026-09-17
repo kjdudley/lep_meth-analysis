@@ -20,7 +20,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Repo-relative: tables ship in conservation/tables/ in this repository.
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tables")
+_HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.join(_HERE, "tables")      # inputs ship here
+OUTDIR = _HERE                             # figures are written beside the script
+os.makedirs(os.path.join(OUTDIR, "figures"), exist_ok=True)
 nulls = np.array([int(l) for l in
                   open(os.path.join(ROOT, "harm_topk.nulls.tsv")).read().split()[1:]])
 OBS, EXP = 183, 90.6
