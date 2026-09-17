@@ -99,6 +99,14 @@ withdrawn claims are reintroduced. It proves transcription, not correctness.
 `methsplice/tables/` holds all seventeen tables the audit and figure scripts
 read, so they run from this repository as shipped.
 
+`methsplice/PARAMETERS.md` is the parameter ledger the paper cites: data sources
+with access dates, software versions, and every analysis parameter classified as
+*derived* from evidence here, a *tool default*, or *conventional*. Its last
+section is a standing list of known methodological gaps with their status,
+published because a gap disclosed is better than a gap discovered. Two sections
+of the internal ledger are omitted, covering the allele-specific phased arm,
+which belongs to a separate multi-author manuscript.
+
 ---
 
 ## `provenance/`
